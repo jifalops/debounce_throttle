@@ -94,6 +94,7 @@ class Throttle<T> extends Observable<T> {
       : super(initialValue: initialValue, onChanged: onChanged);
   final Duration duration;
   Timer _timer;
+  bool _dirty = false;
 
   /// The most recent value, without waiting for the throttle timer to expire.
   @override
@@ -102,13 +103,29 @@ class Throttle<T> extends Observable<T> {
   set value(T val) {
     if (!canceled) {
       _value = val;
-      _timer ??= Timer(duration, () {
+      _dirty = true;
+      if (_timer == null) {
+        _notify(value);
+        _timer = _makeTimer();
+      }
+    }
+  }
+
+  Timer _makeTimer() => Timer(duration, () {
         if (!canceled) {
-          _timer = null;
-          _notify(value);
+          if (_dirty) {
+            _timer = _makeTimer();
+            _notify(value);
+          } else {
+            _timer = null;
+          }
         }
       });
-    }
+
+  @override
+  void _notify(T val) {
+    _dirty = false;
+    super._notify(val);
   }
 
   @override
