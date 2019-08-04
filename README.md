@@ -1,12 +1,11 @@
 # debounce_throttle
 
-An observable, debouncer, and throttle that works with `Future`, `Stream`, and callbacks.
+A debouncer and throttle that works with `Future`, `Stream`, and callbacks.
 
 Class | Purpose
 -|-
 `Debouncer` | Wait for changes to stop before notifying.
 `Throttle` | Notifies once per `Duration` for a value that keeps changing.
-`Observable` | Base class for observing value changes.
 
 ## Usage
 

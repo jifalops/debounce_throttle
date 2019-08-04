@@ -1,65 +1,18 @@
 import 'dart:async';
 import 'package:meta/meta.dart';
-
-typedef void _Callback<T>(T value);
-
-/// Holds a value and notifies listeners whenever that value is set.
-///
-/// Listeners can use the [onChanged] callback, the [nextValue] Future, and/or
-/// the [values] Stream.
-class Observable<T> {
-  Observable({T initialValue, this.onChanged}) : _value = initialValue;
-
-  final _Callback<T> onChanged;
-
-  var _completer = Completer<T>();
-
-  bool _canceled = false;
-  bool get canceled => _canceled;
-
-  T _value;
-
-  /// The current value of this observable.
-  T get value => _value;
-  set value(T val) {
-    if (!canceled) {
-      _value = val;
-      // Delaying notify() allows the Future and Stream to update correctly.
-      Future.delayed(Duration(microseconds: 1), () => _notify(val));
-    }
-  }
-
-  /// Alias for [value] setter. Good for passing to a Future or Stream.
-  void setValue(T val) => value = val;
-
-  void _notify(T val) {
-    if (onChanged != null) onChanged(val);
-    // Completing with a microtask allows a new completer to be constructed
-    // before listeners of [nextValue] are called, allowing them to listen to
-    // nextValue again if desired.
-    _completer.complete(Future.microtask(() => val));
-    _completer = Completer<T>();
-  }
-
-  Future<T> get nextValue => _completer.future;
-  Stream<T> get values async* {
-    while (!canceled) {
-      yield await nextValue;
-    }
-  }
-
-  /// Permanently disables this observable. Further changes to [value] will be
-  /// ignored, the outputs [onChanged], [nextValue], and [values] will not be
-  /// called again.
-  @mustCallSuper
-  void cancel() => _canceled = true;
-}
+import 'package:simple_observable/simple_observable.dart';
 
 /// Debounces value changes by updating [onChanged], [nextValue], and [values]
 /// only after [duration] has elapsed without additional changes.
 class Debouncer<T> extends Observable<T> {
-  Debouncer(this.duration, {T initialValue, _Callback<T> onChanged})
-      : super(initialValue: initialValue, onChanged: onChanged);
+  Debouncer(this.duration,
+      {T initialValue,
+      void Function(T value) onChanged,
+      bool checkEquality = true})
+      : super(
+            initialValue: initialValue,
+            onChanged: onChanged,
+            checkEquality: checkEquality);
   final Duration duration;
   Timer _timer;
 
@@ -67,16 +20,14 @@ class Debouncer<T> extends Observable<T> {
   @override
   T get value => super.value;
 
-  set value(T val) {
-    if (!canceled) {
-      _value = val;
-      _timer?.cancel();
-      _timer = Timer(duration, () {
-        if (!canceled) {
-          _notify(value);
-        }
-      });
-    }
+  @override
+  void notify(T val) {
+    _timer?.cancel();
+    _timer = Timer(duration, () {
+      if (!canceled) {
+        super.notify(val);
+      }
+    });
   }
 
   @override
@@ -90,8 +41,14 @@ class Debouncer<T> extends Observable<T> {
 /// Throttles value changes by updating [onChanged], [nextValue], and [values]
 /// once per [duration] at most.
 class Throttle<T> extends Observable<T> {
-  Throttle(this.duration, {T initialValue, _Callback<T> onChanged})
-      : super(initialValue: initialValue, onChanged: onChanged);
+  Throttle(this.duration,
+      {T initialValue,
+      void Function(T value) onChanged,
+      bool checkEquality = true})
+      : super(
+            initialValue: initialValue,
+            onChanged: onChanged,
+            checkEquality: checkEquality);
   final Duration duration;
   Timer _timer;
   bool _dirty = false;
@@ -100,22 +57,12 @@ class Throttle<T> extends Observable<T> {
   @override
   T get value => super.value;
 
-  set value(T val) {
-    if (!canceled) {
-      _value = val;
-      _dirty = true;
-      if (_timer == null) {
-        _notify(value);
-        _timer = _makeTimer();
-      }
-    }
-  }
-
   Timer _makeTimer() => Timer(duration, () {
         if (!canceled) {
           if (_dirty) {
+            _dirty = false;
             _timer = _makeTimer();
-            _notify(value);
+            super.notify(value);
           } else {
             _timer = null;
           }
@@ -123,9 +70,14 @@ class Throttle<T> extends Observable<T> {
       });
 
   @override
-  void _notify(T val) {
-    _dirty = false;
-    super._notify(val);
+  void notify(T val) {
+    if (_timer == null) {
+      _dirty = false;
+      super.notify(val);
+      _timer = _makeTimer();
+    } else {
+      _dirty = true;
+    }
   }
 
   @override

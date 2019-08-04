@@ -10,17 +10,17 @@ import 'dart:math';
 import 'package:debounce_throttle/debounce_throttle.dart';
 
 void main() async {
-  final debouncer =
-      Debouncer<String>(Duration(milliseconds: 300), onChanged: debounceTick);
-  final throttle =
-      Throttle<String>(Duration(milliseconds: 300), onChanged: throttleTick);
+  final debouncer = Debouncer<String>(Duration(milliseconds: 300),
+      onChanged: debounceTick, initialValue: '');
+  final throttle = Throttle<String>(Duration(milliseconds: 300),
+      onChanged: throttleTick, initialValue: '');
 
   final random = Random();
 
   void doChange() {
     changeTick();
-    debouncer.value = '';
-    throttle.value = '';
+    debouncer.value += '.';
+    throttle.value += '.';
   }
 
   startTicking();

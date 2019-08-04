@@ -1,6 +1,6 @@
 name: debounce_throttle
-description: An observer, debouncer, and throttle that works with Futures, Streams, and callbacks.
-version: 1.0.1+1
+description: A debouncer and throttle that works with Futures, Streams, and callbacks.
+version: 1.1.0
 author: Jacob Phillips <jifalops@gmail.com>
 homepage: https://github.com/jifalops/debounce_throttle
 
@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   meta: ^1.0.0
+  simple_observable: ^1.1.0
 
 dev_dependencies:
   test: ^1.0.0
