@@ -10,10 +10,8 @@ import 'dart:math';
 import 'package:debounce_throttle/debounce_throttle.dart';
 
 void main() async {
-  final debouncer = Debouncer<String>(Duration(milliseconds: 300),
-      onChanged: debounceTick, initialValue: '');
-  final throttle = Throttle<String>(Duration(milliseconds: 300),
-      onChanged: throttleTick, initialValue: '');
+  final debouncer = Debouncer<String>(Duration(milliseconds: 300), onChanged: debounceTick, initialValue: '');
+  final throttle = Throttle<String>(Duration(milliseconds: 300), onChanged: throttleTick, initialValue: '');
 
   final random = Random();
 
@@ -42,8 +40,16 @@ Timer startTicking() => Timer.periodic(Duration(milliseconds: 100), (timer) {
       String changed = '', debounced = '', throttled = '';
       ticks.forEach((tick) {
         changed += tick.changed ? '-' : ' ';
-        debounced += tick.debounced ? tick.debounceError ? 'E' : 'D' : ' ';
-        throttled += tick.throttled ? tick.throttleError ? 'E' : 'T' : ' ';
+        debounced += tick.debounced
+            ? tick.debounceError
+                ? 'E'
+                : 'D'
+            : ' ';
+        throttled += tick.throttled
+            ? tick.throttleError
+                ? 'E'
+                : 'T'
+            : ' ';
       });
       if (Platform.isWindows) {
         print(Process.runSync("cls", [], runInShell: true).stdout);
@@ -77,8 +83,7 @@ void debounceTick(String value) {
   if (!debounceStopwatch.isRunning)
     debounceStopwatch.start();
   else {
-    if (debounceStopwatch.elapsedMilliseconds < 300)
-      ticks.last.debounceError = true;
+    if (debounceStopwatch.elapsedMilliseconds < 300) ticks.last.debounceError = true;
     debounceStopwatch.reset();
   }
 }
@@ -88,8 +93,7 @@ void throttleTick(String value) {
   if (!throttleStopwatch.isRunning)
     throttleStopwatch.start();
   else {
-    if (throttleStopwatch.elapsedMilliseconds < 300)
-      ticks.last.throttleError = true;
+    if (throttleStopwatch.elapsedMilliseconds < 300) ticks.last.throttleError = true;
     throttleStopwatch.reset();
   }
 }

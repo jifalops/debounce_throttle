@@ -5,16 +5,10 @@ import 'package:simple_observable/simple_observable.dart';
 /// Debounces value changes by updating [onChanged], [nextValue], and [values]
 /// only after [duration] has elapsed without additional changes.
 class Debouncer<T> extends Observable<T> {
-  Debouncer(this.duration,
-      {T initialValue,
-      void Function(T value) onChanged,
-      bool checkEquality = true})
-      : super(
-            initialValue: initialValue,
-            onChanged: onChanged,
-            checkEquality: checkEquality);
+  Debouncer(this.duration, {required T initialValue, void Function(T value)? onChanged, bool checkEquality = true})
+      : super(initialValue: initialValue, onChanged: onChanged, checkEquality: checkEquality);
   final Duration duration;
-  Timer _timer;
+  Timer? _timer;
 
   /// The most recent value, without waiting for the debounce timer to expire.
   @override
@@ -41,16 +35,10 @@ class Debouncer<T> extends Observable<T> {
 /// Throttles value changes by updating [onChanged], [nextValue], and [values]
 /// once per [duration] at most.
 class Throttle<T> extends Observable<T> {
-  Throttle(this.duration,
-      {T initialValue,
-      void Function(T value) onChanged,
-      bool checkEquality = true})
-      : super(
-            initialValue: initialValue,
-            onChanged: onChanged,
-            checkEquality: checkEquality);
+  Throttle(this.duration, {required T initialValue, void Function(T value)? onChanged, bool checkEquality = true})
+      : super(initialValue: initialValue, onChanged: onChanged, checkEquality: checkEquality);
   final Duration duration;
-  Timer _timer;
+  Timer? _timer;
   bool _dirty = false;
 
   /// The most recent value, without waiting for the throttle timer to expire.

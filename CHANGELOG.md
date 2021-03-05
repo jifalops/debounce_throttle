@@ -1,3 +1,7 @@
+## [2.0.0]
+
+- Support null safety
+
 ## [1.1.0] - August 4, 2019
 
 - Use `Observable` from the `simple_observable` package.
